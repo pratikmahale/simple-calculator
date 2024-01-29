@@ -24,52 +24,69 @@ function updateNumber(item: number | typeof operations[number]) {
     memory.value = [...memory.value, item];
 }
 
-function evaluateExpression(expression: (number | string)[]): number | string {
+function evaluateExpression(expression: (number | typeof operations[number])[]): number | string {
   if (expression.length % 2 === 0) {
     return 'Invalid expression';
   }
 
   const isValidOperator = (op: string) => operations.includes(op as typeof operations[number]);
+  const precedence = { '+': 1, '-': 1, '*': 2, '/': 2 };
 
-  let result: number | undefined;
-  let currentOperator: string | undefined;
+  const applyOperation = (operator: string, operand1: number, operand2: number): number => {
+    if (operator === '+') {
+      return operand1 + operand2;
+    } else if (operator === '-') {
+      return operand1 - operand2;
+    } else if (operator === '*') {
+      return operand1 * operand2;
+    } else if (operator === '/') {
+      if (operand2 === 0) {
+        throw new Error('Division by zero');
+      }
+      return operand1 / operand2;
+    }
+    throw new Error('Invalid operator');
+  };
+
+  const numbers: number[] = [];
+  const operators: string[] = [];
 
   for (const token of expression) {
     if (typeof token === 'number') {
-      if (result === undefined) {
-        result = token;
-      } else {
-        if (currentOperator === '+') {
-          result += token;
-        } else if (currentOperator === '-') {
-          result -= token;
-        } else if (currentOperator === '*') {
-          result *= token;
-        } else if (currentOperator === '/') {
-          if (token === 0) {
-            return 'Division by zero';
-          }
-          result /= token;
-        }
+      numbers.push(token);
+    } else if (typeof token === 'string' && isValidOperator(token)) {
+      while (
+        operators.length > 0 &&
+        isValidOperator(operators[operators.length - 1]) &&
+        precedence[token] <= precedence[operators[operators.length - 1] as typeof operations[number]]
+      ) {
+        const operator = operators.pop() as string;
+        const operand2 = numbers.pop() as number;
+        const operand1 = numbers.pop() as number;
+        numbers.push(applyOperation(operator, operand1, operand2));
       }
-    } else if (typeof token === 'string') {
-      if (token === '-' && (currentOperator === undefined || isValidOperator(currentOperator))) {
-        currentOperator = '-';
-      } else if (isValidOperator(token)) {
-        currentOperator = token;
-      } else {
-        return 'Invalid expression';
-      }
+      operators.push(token);
+    } else {
+      return 'Invalid expression';
     }
   }
-  if (result === undefined) {
-    return 'Invalid expression';
+
+  while (operators.length > 0) {
+    const operator = operators.pop() as string;
+    const operand2 = numbers.pop() as number;
+    const operand1 = numbers.pop() as number;
+    numbers.push(applyOperation(operator, operand1, operand2));
   }
+
+  const result = numbers[0];
+
   if (!isFinite(result)) {
     return 'Division by zero';
   }
+
   return result;
 }
+
 function reverseSignLastItem() {
     const lastElement = memory.value.at(-1)?.toString();
     if (typeof lastElement === 'undefined') {
