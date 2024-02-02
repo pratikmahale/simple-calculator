@@ -105,9 +105,7 @@ function calculate() {
         const result = evaluateExpression(memory.value);
         currentResult.value = result;
     } catch (e) {
-        error.value = (e as {
-            message: string;
-        }).message;
+        error.value = typeof e === 'string' ? e : "Invalid expression";
     }
 
 }
