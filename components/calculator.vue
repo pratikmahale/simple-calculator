@@ -100,12 +100,7 @@ function reverseSignLastItem(
     if (typeof lastElement === "undefined") {
         return items;
     }
-    if (
-        lastElement.includes("+") ||
-        lastElement.includes("-") ||
-        lastElement.includes("*") ||
-        lastElement.includes("/")
-    ) {
+    if (operations.includes(lastElement as (typeof operations)[number])) {
         return items;
     }
     return [...items.slice(0, -1), Number(lastElement) * -1];
