@@ -15,7 +15,7 @@ function addToMemory(item: number | typeof operations[number]) {
         memory.value = [item];
         return;
     }
-    if (lastElement.includes("+") || lastElement.includes("-") || lastElement.includes("*") || lastElement.includes("/")) {
+    if (operations.includes(lastElement as (typeof operations)[number])) {
         memory.value = [...memory.value, item];
         return;
     }
@@ -27,72 +27,66 @@ function addToMemory(item: number | typeof operations[number]) {
 }
 
 
-function evaluateExpression(expression: Expression): number | string {
-    const { numbers, operators } = parseExpression(expression);
+
+function evaluateExpression(exp: Expression): number | string {
+    const expression = [...exp];
     // first round, higher precedence operations
-    for (let i = 0; i < operators.length; i++) {
-        let result = 0;
-        if (operators[i] === "*") {
-            result = numbers[i] * numbers[i + 1];
-            numbers.splice(i, 2, result);
-            operators.splice(i, 1);
+    for (let i = 0; i < expression.length; i++) {
+        console.log(expression[i])
+        if (expression[i] === "*") {
+            const number1 = expression[i - 1];
+            const number2 = expression[i + 1];
+            if (typeof number1 !== 'number' || typeof number2 !== 'number') {
+                throw "Invalid expression";
+            }
+            const result = number1 * number2;
+            expression.splice(i - 1, 3, result);
+            // move the index back, as we removed 2 items from the array
+            i -= 2;
+
         }
-        if (operators[i] === "/") {
-            result = numbers[i] / numbers[i + 1];
-            numbers.splice(i, 2, result);
-            operators.splice(i, 1);
+        if (expression[i] === "/") {
+            const number1 = expression[i - 1];
+            const number2 = expression[i + 1];
+            if (typeof number1 !== 'number' || typeof number2 !== 'number') {
+                throw "Invalid expression";
+            }
+            const result = number1 / number2;
+            expression.splice(i - 1, 3, result);
+            // move the index back, as we removed 2 items from the array
+            i -= 2;
         }
     }
-    // additional rounds, until there are no more operators
-    while (operators.length > 0) {
-        if (operators[0] === "+") {
-            const result = numbers[0] + numbers[1];
-            numbers.splice(0, 2, result);
-            operators.splice(0, 1);
-        }
-        if (operators[0] === "-") {
-            const result = numbers[0] - numbers[1];
-            numbers.splice(0, 2, result);
-            operators.splice(0, 1);
+    // additional rounds, until there is only the result left in the expression
+    while (expression.length > 1) {
+        for (let i = 0; i < expression.length; i++) {
+            if (expression[i] === "+") {
+                const number1 = expression[i - 1];
+                const number2 = expression[i + 1];
+                if (typeof number1 !== 'number' || typeof number2 !== 'number') {
+                    throw "Invalid expression";
+                }
+                const result = number1 + number2;
+                expression.splice(i - 1, 3, result);
+            }
+            if (expression[i] === "-") {
+                const number1 = expression[i - 1];
+                const number2 = expression[i + 1];
+                if (typeof number1 !== 'number' || typeof number2 !== 'number') {
+                    throw "Invalid expression";
+                }
+                const result = number1 - number2;
+                expression.splice(i - 1, 3, result);
+            }
         }
     }
-    if (numbers.length !== 1) {
+    if (expression.length !== 1) {
         throw "Invalid expression";
     }
     // return the last number left
-    return numbers[0];
+    return expression[0];
 }
 
-function parseExpression(expression: Expression) {
-    let numberFound = false;
-    let operatorFound = false;
-    const numbers: number[] = [];
-    const operators: (typeof operations)[number][] = [];
-    for (const i in expression) {
-        const value = expression[i];
-        if (typeof value === "string") {
-            if (Number(i) === 0) {
-                throw new Error("Operator at the beginning");
-            }
-            if (operatorFound) {
-                throw new Error("Two operators in a row");
-            }
-            operators.push(value);
-            operatorFound = true;
-            numberFound = false;
-            continue;
-        }
-        if (typeof value === "number") {
-            if (numberFound) {
-                throw new Error("Two numbers in a row");
-            }
-            numbers.push(value);
-            numberFound = true;
-            operatorFound = false;
-        }
-    }
-    return { numbers, operators };
-}
 function reverseSignLastItem(
     items: Array<number | (typeof operations)[number]>
 ) {
