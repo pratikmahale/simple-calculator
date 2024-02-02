@@ -32,49 +32,27 @@ function evaluateExpression(exp: Expression): number | string {
     const expression = [...exp];
     // first round, higher precedence operations
     for (let i = 0; i < expression.length; i++) {
-        if (expression[i] === "*") {
+        if (expression[i] === "*" || expression[i] === "/") {
             const number1 = expression[i - 1];
             const number2 = expression[i + 1];
             if (typeof number1 !== 'number' || typeof number2 !== 'number') {
                 throw "Invalid expression";
             }
-            const result = number1 * number2;
+            const result = expression[i] === "*" ? number1 * number2 : number1 / number2;
             expression.splice(i - 1, 3, result);
-            // move the index back, as we removed 2 items from the array
-            i -= 2;
-
-        }
-        if (expression[i] === "/") {
-            const number1 = expression[i - 1];
-            const number2 = expression[i + 1];
-            if (typeof number1 !== 'number' || typeof number2 !== 'number') {
-                throw "Invalid expression";
-            }
-            const result = number1 / number2;
-            expression.splice(i - 1, 3, result);
-            // move the index back, as we removed 2 items from the array
-            i -= 2;
+            // move the index
         }
     }
     // additional rounds, until there is only the result left in the expression
     while (expression.length > 1) {
         for (let i = 0; i < expression.length; i++) {
-            if (expression[i] === "+") {
+            if (expression[i] === "+" || expression[i] === "-") {
                 const number1 = expression[i - 1];
                 const number2 = expression[i + 1];
                 if (typeof number1 !== 'number' || typeof number2 !== 'number') {
                     throw "Invalid expression";
                 }
-                const result = number1 + number2;
-                expression.splice(i - 1, 3, result);
-            }
-            if (expression[i] === "-") {
-                const number1 = expression[i - 1];
-                const number2 = expression[i + 1];
-                if (typeof number1 !== 'number' || typeof number2 !== 'number') {
-                    throw "Invalid expression";
-                }
-                const result = number1 - number2;
+                const result = expression[i] === "+" ? number1 + number2 : number1 - number2;
                 expression.splice(i - 1, 3, result);
             }
         }
