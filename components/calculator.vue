@@ -32,7 +32,6 @@ function evaluateExpression(exp: Expression): number | string {
     const expression = [...exp];
     // first round, higher precedence operations
     for (let i = 0; i < expression.length; i++) {
-        console.log(expression[i])
         if (expression[i] === "*") {
             const number1 = expression[i - 1];
             const number2 = expression[i + 1];
