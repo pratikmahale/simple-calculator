@@ -40,6 +40,8 @@ function evaluateExpression(exp: Expression): number | string {
             }
             const result = expression[i] === "*" ? number1 * number2 : number1 / number2;
             expression.splice(i - 1, 3, result);
+            // go back two steps, because we removed two items from the array
+            i -= 2;
         }
     }
     // additional rounds, until there is only the result left in the expression
