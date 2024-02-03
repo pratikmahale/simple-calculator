@@ -44,7 +44,7 @@ function evaluateExpression(exp: Expression): number | string {
             i -= 2;
         }
     }
-    // additional rounds, until there is only the result left in the expression
+    // second round, lower precedence operations
     for (let i = 0; i < expression.length; i++) {
         if (expression[i] === "+" || expression[i] === "-") {
             const number1 = expression[i - 1];
